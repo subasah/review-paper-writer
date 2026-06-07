@@ -1,5 +1,5 @@
-import { handleOptions, jsonResponse, errorResponse } from '../_lib/cors'
-import { searchScopus } from '../search/scopus'
+import { handleOptions, jsonResponse, errorResponse } from '../_lib/cors.js'
+import { searchScopus } from '../search/scopus.js'
 
 export default async function handler(req: Request): Promise<Response> {
   const options = handleOptions(req)

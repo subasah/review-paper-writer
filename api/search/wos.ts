@@ -1,4 +1,4 @@
-import type { NormalizedRecord } from './pubmed'
+import type { NormalizedRecord } from './pubmed.js'
 
 export async function searchWoS(
   query: string,

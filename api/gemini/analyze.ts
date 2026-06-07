@@ -1,5 +1,5 @@
-import { handleOptions, jsonResponse, errorResponse } from '../_lib/cors'
-import { generateText } from '../_lib/gemini'
+import { handleOptions, jsonResponse, errorResponse } from '../_lib/cors.js'
+import { generateText, getGeminiApiKey } from '../_lib/gemini.js'
 
 export default async function handler(req: Request): Promise<Response> {
   const options = handleOptions(req)

@@ -1,10 +1,10 @@
-import { handleOptions, jsonResponse, errorResponse } from '../_lib/cors'
-import { searchPubMed } from './pubmed'
-import { searchOpenAlex } from './openalex'
-import { searchSemanticScholar } from './semantic-scholar'
-import { searchScopus } from './scopus'
-import { searchWoS } from './wos'
-import type { NormalizedRecord } from './pubmed'
+import { handleOptions, jsonResponse, errorResponse } from '../_lib/cors.js'
+import { searchPubMed } from './pubmed.js'
+import { searchOpenAlex } from './openalex.js'
+import { searchSemanticScholar } from './semantic-scholar.js'
+import { searchScopus } from './scopus.js'
+import { searchWoS } from './wos.js'
+import type { NormalizedRecord } from './pubmed.js'
 
 function normalizeDoi(doi?: string): string | null {
   if (!doi) return null
