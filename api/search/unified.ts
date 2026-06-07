@@ -1,4 +1,5 @@
-import { handleOptions, jsonResponse, errorResponse } from '../_lib/cors.js'
+import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { handleOptions } from '../_lib/vercel.js'
 import { searchPubMed } from './pubmed.js'
 import { searchOpenAlex } from './openalex.js'
 import { searchSemanticScholar } from './semantic-scholar.js'
@@ -29,16 +30,12 @@ function deduplicateRecords(records: NormalizedRecord[]): {
   return { unique, duplicatesRemoved: records.length - unique.length }
 }
 
-export default async function handler(req: Request): Promise<Response> {
-  const options = handleOptions(req)
-  if (options) return options
-
-  if (req.method !== 'POST') {
-    return errorResponse('Method not allowed', req, 405)
-  }
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (handleOptions(req, res)) return
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   try {
-    const body = (await req.json()) as {
+    const body = req.body as {
       booleanQuery: string
       databases: string[]
       yearFrom: number
@@ -50,8 +47,8 @@ export default async function handler(req: Request): Promise<Response> {
     const perSource: Record<string, number> = {}
     const allRecords: NormalizedRecord[] = []
 
-    const scopusKey = req.headers.get('X-Scopus-Api-Key') || process.env.SCOPUS_API_KEY
-    const wosKey = req.headers.get('X-Wos-Api-Key') || process.env.WOS_API_KEY
+    const scopusKey = (req.headers['x-scopus-api-key'] as string) || process.env.SCOPUS_API_KEY
+    const wosKey = (req.headers['x-wos-api-key'] as string) || process.env.WOS_API_KEY
 
     const searches = databases.map(async (db) => {
       try {
@@ -92,13 +89,13 @@ export default async function handler(req: Request): Promise<Response> {
       screeningDecision: 'pending' as const,
     }))
 
-    return jsonResponse({
+    return res.status(200).json({
       records,
       perSource,
       totalFound: allRecords.length,
       duplicatesRemoved,
-    }, req)
+    })
   } catch (e) {
-    return errorResponse((e as Error).message, req)
+    return res.status(500).json({ error: (e as Error).message })
   }
 }

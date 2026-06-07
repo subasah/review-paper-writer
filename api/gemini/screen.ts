@@ -1,14 +1,14 @@
-import { handleOptions, jsonResponse, errorResponse } from '../_lib/cors.js'
-import { generateText, getGeminiApiKey } from '../_lib/gemini.js'
+import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { handleOptions, requireGeminiKey } from '../_lib/vercel.js'
+import { generateText } from '../_lib/gemini.js'
 
-export default async function handler(req: Request): Promise<Response> {
-  const options = handleOptions(req)
-  if (options) return options
-
-  if (req.method !== 'POST') return errorResponse('Method not allowed', req, 405)
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (handleOptions(req, res)) return
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
+  if (!requireGeminiKey(res)) return
 
   try {
-    const body = (await req.json()) as {
+    const body = req.body as {
       studies: Array<{ id: string; title: string; abstract: string; year: number }>
       inclusionCriteria: string[]
       exclusionCriteria: string[]
@@ -47,8 +47,8 @@ Only use study IDs provided. Do not invent studies.`
       }
     }
 
-    return jsonResponse({ decisions: allDecisions }, req)
+    return res.status(200).json({ decisions: allDecisions })
   } catch (e) {
-    return errorResponse((e as Error).message, req)
+    return res.status(500).json({ error: (e as Error).message })
   }
 }

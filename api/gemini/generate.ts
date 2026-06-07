@@ -1,29 +1,35 @@
-import { handleOptions, jsonResponse, errorResponse } from '../_lib/cors.js'
-import { generateWithStudies, getGeminiApiKey } from '../_lib/gemini.js'
+import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { GoogleGenerativeAI } from '@google/generative-ai'
+import { handleOptions, requireGeminiKey } from '../_lib/vercel.js'
 
-export default async function handler(req: Request): Promise<Response> {
-  const options = handleOptions(req)
-  if (options) return options
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (handleOptions(req, res)) return
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  if (req.method !== 'POST') return errorResponse('Method not allowed', req, 405)
-
-  if (!getGeminiApiKey()) {
-    return errorResponse('GEMINI_API_KEY not configured. Add it in Vercel → Settings → Environment Variables, then redeploy.', req, 500)
-  }
+  const apiKey = requireGeminiKey(res)
+  if (!apiKey) return
 
   try {
-    const body = (await req.json()) as {
+    const body = req.body as {
       prompt: string
       studies?: Array<{ title: string; authors?: string[]; year?: number; abstract?: string }>
       jsonMode?: boolean
     }
 
-    const text = await generateWithStudies(
-      body.prompt,
-      body.studies ?? [],
-      'gemini-2.0-flash',
-      body.jsonMode ?? false
-    )
+    const genAI = new GoogleGenerativeAI(apiKey)
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.0-flash',
+      generationConfig: body.jsonMode
+        ? { responseMimeType: 'application/json' }
+        : undefined,
+    })
+
+    const studiesContext = (body.studies ?? []).length
+      ? `\n\nAvailable studies for citation:\n${(body.studies ?? []).map((s, i) => `${i + 1}. ${s.authors?.[0] || 'Unknown'} (${s.year || 'n.d.'}) - ${s.title}`).join('\n')}`
+      : ''
+
+    const result = await model.generateContent(body.prompt + studiesContext)
+    const text = result.response.text()
 
     let structured: unknown
     if (body.jsonMode) {
@@ -34,8 +40,8 @@ export default async function handler(req: Request): Promise<Response> {
       }
     }
 
-    return jsonResponse({ text, structured }, req)
+    return res.status(200).json({ text, structured })
   } catch (e) {
-    return errorResponse((e as Error).message, req)
+    return res.status(500).json({ error: (e as Error).message })
   }
 }
