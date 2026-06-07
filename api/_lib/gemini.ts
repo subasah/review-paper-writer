@@ -4,6 +4,11 @@ export function getGeminiApiKey(): string | undefined {
   return process.env.GEMINI_API_KEY?.trim()
 }
 
+/** gemini-2.0-flash free-tier quota is 0 — use 2.5 Flash (override via GEMINI_MODEL env) */
+export function getDefaultGeminiModel(): string {
+  return process.env.GEMINI_MODEL?.trim() || 'gemini-2.5-flash'
+}
+
 export function getGeminiClient() {
   const apiKey = getGeminiApiKey()
   if (!apiKey) throw new Error('GEMINI_API_KEY not configured')
@@ -12,7 +17,7 @@ export function getGeminiClient() {
 
 export async function generateText(
   prompt: string,
-  model = 'gemini-2.0-flash',
+  model = getDefaultGeminiModel(),
   jsonMode = false
 ): Promise<string> {
   const genAI = getGeminiClient()
@@ -29,7 +34,7 @@ export async function generateText(
 export async function generateWithStudies(
   prompt: string,
   studies: Array<{ title: string; authors?: string[]; year?: number; abstract?: string }>,
-  model = 'gemini-2.0-flash',
+  model = getDefaultGeminiModel(),
   jsonMode = false
 ): Promise<string> {
   const studiesContext = studies.length

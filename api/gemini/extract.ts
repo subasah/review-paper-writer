@@ -20,7 +20,7 @@ Only extract information explicitly stated in the abstracts. Use "Not reported" 
 Studies:
 ${body.studies.map((s) => `ID: ${s.id}\nTitle: ${s.title}\nAuthors: ${s.authors.join(', ')}\nYear: ${s.year}\nAbstract: ${s.abstract}\n---`).join('\n')}`
 
-    const result = await generateText(prompt, 'gemini-2.0-flash', true)
+    const result = await generateText(prompt, undefined, true)
     let extractions = []
     try {
       extractions = JSON.parse(result)

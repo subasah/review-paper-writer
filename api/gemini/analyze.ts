@@ -10,7 +10,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const body = req.body as { prompt: string; data: unknown }
     const fullPrompt = `${body.prompt}\n\nData:\n${JSON.stringify(body.data, null, 2)}`
-    const text = await generateText(fullPrompt, 'gemini-2.0-flash', false)
+    const text = await generateText(fullPrompt)
     return res.status(200).json({ text })
   } catch (e) {
     return res.status(500).json({ error: (e as Error).message })

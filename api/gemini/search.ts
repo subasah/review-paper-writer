@@ -19,7 +19,7 @@ title, authors (array), year, abstract (brief summary from source), doi (if know
 Mark these as web-discovered results. Only include publications you can reasonably verify exist.
 Maximum 20 results. Do not invent DOIs or PMIDs.`
 
-    const result = await generateText(prompt, 'gemini-2.0-flash', true)
+    const result = await generateText(prompt, undefined, true)
     let records: Array<{
       id: string
       title: string

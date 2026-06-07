@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { handleOptions, requireGeminiKey } from '../_lib/vercel.js'
+import { getDefaultGeminiModel } from '../_lib/gemini.js'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (handleOptions(req, res)) return
@@ -18,7 +19,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash',
+      model: getDefaultGeminiModel(),
       generationConfig: body.jsonMode
         ? { responseMimeType: 'application/json' }
         : undefined,

@@ -36,7 +36,7 @@ ${batch.map((s) => `ID: ${s.id}\nTitle: ${s.title}\nYear: ${s.year}\nAbstract: $
 Return JSON array: [{"studyId": "...", "decision": "include"|"exclude"|"maybe", "reason": "..."}]
 Only use study IDs provided. Do not invent studies.`
 
-      const result = await generateText(prompt, 'gemini-2.0-flash', true)
+      const result = await generateText(prompt, undefined, true)
       try {
         const parsed = JSON.parse(result) as Array<{ studyId: string; decision: string; reason: string }>
         allDecisions.push(...parsed)
