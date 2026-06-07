@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 export function getGeminiApiKey(): string | undefined {
-  return process.env.GEMINI_API_KEY
+  return process.env.GEMINI_API_KEY?.trim()
 }
 
 export function getGeminiClient() {

@@ -16,7 +16,7 @@ export function handleOptions(req: VercelRequest, res: VercelResponse): boolean 
 }
 
 export function requireGeminiKey(res: VercelResponse): string | null {
-  const apiKey = process.env.GEMINI_API_KEY
+  const apiKey = process.env.GEMINI_API_KEY?.trim()
   if (!apiKey) {
     res.status(500).json({
       error: 'GEMINI_API_KEY not configured. Add it in Vercel → Settings → Environment Variables, then redeploy.',
